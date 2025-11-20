@@ -11,9 +11,10 @@ editor: visual
 #library(tidyverse)
 #library(ggplot2)
 #install.packages("lme4")
-install.packages("Matrix")
+#install.packages("Matrix")
 #library(lme4)
-library(Matrix)
+#library(Matrix)
+.libPaths()
 ```
 
 ## Problem 1
