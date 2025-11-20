@@ -67,6 +67,11 @@ Generate artificial data by running the code in script:
 source("script_q3.R")
 ```
 
+```{r}
+system.file(package = "Matrix")
+packageVersion("Matrix")
+```
+
 a. Fit one model per country. Fit a mixed effects logistic regression model, predicting course completion based upon prior GPA, number of forum posts, number of quiz attempts, and a random effect for device type. Standardize the predictors within each country. Generate some sort of visualization of the estimated coefficients for number of forum posts in each country.
 
 ```{r}
