@@ -7,12 +7,12 @@ editor: visual
 
 ```{r}
 #libraries
-library(dplyr)
-library(tidyverse)
-library(ggplot2)
+#library(dplyr)
+#library(tidyverse)
+#library(ggplot2)
 #install.packages("lme4")
 install.packages("Matrix")
-library(lme4)
+#library(lme4)
 library(Matrix)
 ```
 
@@ -66,11 +66,7 @@ Generate artificial data by running the code in script:
 ```{r}
 source("script_q3.R")
 ```
-
-```{r}
-system.file(package = "Matrix")
-packageVersion("Matrix")
-```
+`
 
 a. Fit one model per country. Fit a mixed effects logistic regression model, predicting course completion based upon prior GPA, number of forum posts, number of quiz attempts, and a random effect for device type. Standardize the predictors within each country. Generate some sort of visualization of the estimated coefficients for number of forum posts in each country.
 
