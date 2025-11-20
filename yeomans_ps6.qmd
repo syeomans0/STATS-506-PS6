@@ -7,14 +7,14 @@ editor: visual
 
 ```{r}
 #libraries
-#library(dplyr)
-#library(tidyverse)
-#library(ggplot2)
-#install.packages("lme4")
-#install.packages("Matrix")
-#library(lme4)
-#library(Matrix)
-.libPaths()
+install.packages("dplyr")
+library(dplyr)
+install.packages("tidyverse")
+library(tidyverse)
+library(ggplot2)
+install.packages("lme4")
+library(lme4)
+library(Matrix)
 ```
 
 ## Problem 1
