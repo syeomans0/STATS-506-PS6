@@ -5,6 +5,17 @@ format: html
 editor: visual
 ---
 
+```{r}
+#libraries
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+#install.packages("lme4")
+install.packages("Matrix")
+library(lme4)
+library(Matrix)
+```
+
 ## Problem 1
 
 We defined a C_mean function. Using this as a template, implement a C_moment function that returns the kth central moment. Generate a vector of moderate length and show that you are able to replicate the results of e1071::moment.
@@ -53,16 +64,103 @@ Compare and comment on the performance of the two compute methods.
 Generate artificial data by running the code in script:
 
 ```{r}
-
+source("script_q3.R")
 ```
 
 a. Fit one model per country. Fit a mixed effects logistic regression model, predicting course completion based upon prior GPA, number of forum posts, number of quiz attempts, and a random effect for device type. Standardize the predictors within each country. Generate some sort of visualization of the estimated coefficients for number of forum posts in each country.
+
+```{r}
+#Germany
+df_germ <- df %>%
+           filter(country == "Germany") %>%
+           mutate(prior_gpa_s = scale(prior_gpa),
+                  forum_posts_s = scale(forum_posts),
+                  quiz_attempts_s = scale(quiz_attempts)) 
+
+lr_germany <- glmer(completed_course ~ prior_gpa_s + 
+                                       forum_posts_s + 
+                                       quiz_attempts_s + 
+                                       (1|device_type), data = df_germ,
+                                       family = binomial) 
+#united states
+df_us <- df %>%
+         filter(country == "US") %>%
+         mutate(prior_gpa_s = scale(prior_gpa),
+                forum_posts_s = scale(forum_posts),
+                quiz_attempts_s = scale(quiz_attempts))
+
+lr_us <- glmer(completed_course ~ prior_gpa_s + 
+                                  forum_posts_s + 
+                                  quiz_attempts_s + 
+                                  (1|device_type), data = df_us,
+                                  family = binomial) 
+
+#India
+df_india <- df %>%
+            filter(country == "India") %>%
+            mutate(prior_gpa_s = scale(prior_gpa),
+                   forum_posts_s = scale(forum_posts),
+                   quiz_attempts_s = scale(quiz_attempts))
+
+lr_india <- glmer(completed_course ~ prior_gpa_s + 
+                                     forum_posts_s + 
+                                     quiz_attempts_s + 
+                                     (1|device_type), data = df_india,
+                                     family = binomial) 
+
+#Lithuania
+df_lithuania <- df %>%
+                filter(country == "Lithuania") %>%
+                mutate(prior_gpa_s = scale(prior_gpa),
+                       forum_posts_s = scale(forum_posts),
+                       quiz_attempts_s = scale(quiz_attempts)) 
+
+lr_lithuania <- glmer(completed_course ~ prior_gpa_s + 
+                                         forum_posts_s + 
+                                         quiz_attempts_s + 
+                                         (1|device_type), data = df_lithuania,
+                                         family = binomial) 
+
+#Nigeria
+df_nigeria <- df %>%
+              filter(country == "Nigeria") %>%
+              mutate(prior_gpa_s = scale(prior_gpa),
+                     forum_posts_s = scale(forum_posts),
+                     quiz_attempts_s = scale(quiz_attempts)) 
+
+lr_nigeria <- glmer(completed_course ~ prior_gpa_s + 
+                                       forum_posts_s + 
+                                       quiz_attempts_s + 
+                                       (1|device_type), data = df_nigeria,
+                                       family = binomial) 
+
+#other countries
+df_other <- df %>%
+            filter(country == "Other") %>%
+            mutate(prior_gpa_s = scale(prior_gpa),
+                   forum_posts_s = scale(forum_posts),
+                   quiz_attempts_s = scale(quiz_attempts)) 
+
+lr_other <- glmer(completed_course ~ prior_gpa_s + 
+                                     forum_posts_s + 
+                                     quiz_attempts_s + 
+                                     (1|device_type), data = df_other,
+                                     family = binomial)
+```
+
+
+```{r}
+#Visualization of the estimated coefficients for number of forum posts in each country
+
+```
+
 
 Report the running time (from system.time) for each of the 6 models.
 
 ```{r}
 
 ```
+
 
 b. Devise an approach that minimizes the running time of your script. Report the running time of your entire script (running models and estimating coefficients; no need for a new plot). Do not use a different package for the models. Show that the results match those from part a).
 
