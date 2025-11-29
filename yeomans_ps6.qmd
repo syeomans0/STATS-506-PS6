@@ -297,7 +297,6 @@ a. How many tournaments took place in 2019?
 #I didn't do this last time)
 atp <- atp[tourney_date != "20181231"]
 tournaments <- atp[, .(tourney_name = unique(tourney_name))]
-tournaments[, .N]
 
 #this is from the solutions and what i need to do for davis situation
 #tourneys <- tourneys %>%
@@ -309,18 +308,27 @@ tournaments[, .N]
 #  nrow()
 
 #davis fix
-davis_fix <- atp[grepl("^Davis", tourney_name), tourney_name := "Davis Cup" ]
-davis_fix <- atp[ , .(tourney_name = unique(tourney_name))]
-davis_fix[, .N]
+fixed_davis <- tournaments[
+  , tourney_name := str_replace(tourney_name, "Davis.*", "Davis Cup")
+  ][, .(tourney_name = unique(tourney_name))]
+
+fixed_davis[, .N]
+
 ```
-This doesn't quite match the solutions, but it makes sense it is off by three. This is due to the fact that I am still excluding the 2018 date, in which there are three observations. The solutions didn't include this, so it makes sense mine is off by $3$ with a total number of $66$ unique tournaments.
+This doesn't quite match the solutions, but it makes sense it is off by three. This is due to the fact that I am still excluding the 2018 date, in which there are three observations. The solutions didn't include this, so it makes sense mine is off by $3$ for a total number of $66$ unique tournaments.
 
 b. Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
 
 ```{r}
+play_win <- atp[, .SD[which.max(match_num)], by = tourney_name]
+
+multiple_W <- play_win[, .(wins = .N), by = winner_name][wins > 1][order(-wins)]
+
+multiple_W[, .N]     
+multiple_W[1:2]
 
 ```
-
+The total number of players with multiple tournament wins is $17$ and the player with the most wins was Rafael Nadal with $9$ tournament wins, which matches the solutions. 
 
 c. Is there any evidence that winners have more aces than losers? (If you address this with a hypothesis test, do not use base R functionality - continue to remain in the Tidyverse.)
 
