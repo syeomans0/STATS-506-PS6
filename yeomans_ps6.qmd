@@ -351,8 +351,19 @@ wins_tot <- atp[ , .(num_wins = .N),
 loss_tot <- atp[ , .(num_losses = .N), 
                 by = .(player_id = loser_id, player_name = loser_name)]
 
-
+total_players <- merge(wins_tot, loss_tot, by = c("player_id", "player_name"), 
+                      all = TRUE)
+#deal with NAs just like last time
+total_players[is.na(num_wins), num_wins := 0]
+total_players[is.na(num_losses), num_losses := 0]
+#add columns for total matches and the win rate
+total_players[, total_matches := num_wins + num_losses]
+total_players[, win_rate := (num_wins / total_matches) * 100]
+#Restrict to players with at least 5 matches and start with highest
+win_rate_final <- total_players[total_matches >= 5, .(player_name, win_rate)
+                                ][order(-win_rate)]
+head(win_rate_final)
 ```
-
+From this, we can see that Rafael Nadal has the highest win rate with $86.96\%$ (rounded to two decimal places), and he was the player with the most wins as well. This matches the solutions from problem set 4. 
 
 
