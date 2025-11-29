@@ -116,7 +116,6 @@ Generate artificial data by running the code in script:
 ```{r}
 source("script_q3.R")
 ```
-`
 
 a. Fit one model per country. Fit a mixed effects logistic regression model, predicting course completion based upon prior GPA, number of forum posts, number of quiz attempts, and a random effect for device type. Standardize the predictors within each country. Generate some sort of visualization of the estimated coefficients for number of forum posts in each country.
 
@@ -209,7 +208,20 @@ lr_other
 
 ```{r}
 #Visualization of the estimated coefficients for number of forum posts in each country
+#get the coefficients first and make a data frame with them
+forum_posts_coefs <- data.frame(
+  country = c("Germany", "US", "India", "Lithuania", "Nigeria", "Other"),
+  coef = c(0.1766, 0.1782, 0.1762, 0.1747, 0.1916, 0.1751))
 
+# Plot
+ggplot(forum_posts_coefs, aes(x = country, y = coef)) +
+  geom_point(size = 3, color = "pink") +
+  labs(
+    title = "Coefficient for the forum posts by country",
+    x = "Country",
+    y = "Coefficients"
+  ) +
+  theme_minimal()
 ```
 
 
