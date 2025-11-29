@@ -120,6 +120,7 @@ source("script_q3.R")
 a. Fit one model per country. Fit a mixed effects logistic regression model, predicting course completion based upon prior GPA, number of forum posts, number of quiz attempts, and a random effect for device type. Standardize the predictors within each country. Generate some sort of visualization of the estimated coefficients for number of forum posts in each country.
 
 ```{r}
+#| echo: true
 #Germany
 df_germ <- df %>%
            filter(country == "Germany") %>%
@@ -207,6 +208,7 @@ lr_other
 
 
 ```{r}
+#| echo: true
 #Visualization of the estimated coefficients for number of forum posts in each country
 #get the coefficients first and make a data frame with them
 forum_posts_coefs <- data.frame(
@@ -223,7 +225,7 @@ ggplot(forum_posts_coefs, aes(x = country, y = coef)) +
   ) +
   theme_minimal()
 ```
-
+From this graph we can see that all the countries have similar coefficients for the forum posts. However, we do see a bit of a gap between Nigeria and the others. Also, have to note that the coefficients are the log of the odds ratio and kind of hard to interpret. All the coefficients are in the range of $0.1700$ and $0.200$.
 
 Report the running time (from system.time) for each of the 6 models.
 
@@ -283,7 +285,7 @@ time_other <- system.time({
 time_other["elapsed"]
 
 ```
-
+From this, we can see that all the models take a while to run, but we see that the other category, India, and the US take a bit longer than the others (possibly due to them having more observations, particularly for other bc this could have multiple countries. On the other hand, Lithuania and Nigeria take the shortest time to run with only a couple seconds(I assume this is the units), maybe because it has less observations. 
 
 b. Devise an approach that minimizes the running time of your script. Report the running time of your entire script (running models and estimating coefficients; no need for a new plot). Do not use a different package for the models. Show that the results match those from part a).
 
