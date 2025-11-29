@@ -1,35 +1,77 @@
 ---
 title: "Problem Set 6"
 author: "Sydney Yeomans"
-format: html
+format:
+  html:
+    embed-resources: true
 editor: visual
 ---
 
-```{r}
-#libraries
-install.packages("dplyr")
-library(dplyr)
-install.packages("tidyverse")
-library(tidyverse)
-library(ggplot2)
-install.packages("lme4")
-library(lme4)
-library(Matrix)
-```
 
 ## Problem 1
 
-We defined a C_mean function. Using this as a template, implement a C_moment function that returns the kth central moment. Generate a vector of moderate length and show that you are able to replicate the results of e1071::moment.
+We defined a C_mean function. Using this as a template, implement a C_moment function that returns the kth central moment.
 
-```{r}
 
+```{r, error=TRUE}
+#| echo: true
+#library(Rcpp)
+#template
+#cppFunction("
+#double C_mean(NumericVector v) {
+#  double sum = 0;
+#  for (int i = 0; i < v.length(); ++i){
+#     sum += v[i];
+#  }
+#  return(sum/v.length());
+#}")
+
+#moment formula: mu = E[(x-mu)^k]
+cppFunction("
+double C_moment(NumericVector v, int k) {
+  int n = v.length();
+  
+  // compute the mean, copt from temp
+  double sum = 0;
+  for (int i = 0; i < v.length(); ++i) {
+    sum += v[i];
+  }
+  double mean = sum / v.length();
+
+  // moment calculation
+  double mom_sum = 0;
+  for (int i = 0; i < v.length(); ++i) {
+    mom_sum += pow(v[i] - mean, k);
+  }
+
+  return mom_sum / v.length();
+}
+")
 ```
+
+Generate a vector of moderate length and show that you are able to replicate the results of e1071::moment.
+ 
+```{r}
+#Be cognizant of your scaling factor.
+#Be sure to look at the arguments of e1071::moment
+#install.packages("e1071")
+library(e1071)
+?e1071::moment
+
+set.seed(3)
+x <- rnorm(50)
+C_moment(x, 4)
+moment(x, order = 4, center = TRUE, absolute = FALSE, scale = TRUE)
+```
+
+I ran into issues constantly with this problem, issues on a system level not really with the code itself. I keep getting the error to install something to compile C code, but I have installed it (and uninstalled it) multiple times and it has never worked. I am assuming this would work if whatever underlying C/C++ issues I am running into was not occurring. I have given up on trying to get it to work, I will take the L.
 
 ## Problem 2
 
 a. Write a class bootstrapWaldCI that produces a CI using bootstrap, similar to waldCI.
 
 ```{r}
+
 
 ```
 
@@ -46,7 +88,14 @@ rebootstrap(ci1)
 Compare and comment on the performance of the two compute methods.
 
 
-c. Write a function called dispCoef that takes in data (based upon mtcars; it must take in a generic data for the bootstrap) and fits the model: mpg ~     cyl + disp + wt. It should return the coefficient associated with disp. Execute the following:
+c. Write a function called dispCoef that takes in data (based upon mtcars; it must take in a generic data for the bootstrap) and fits the model: mpg ~ cyl + disp + wt. It should return the coefficient associated with disp. 
+
+```{r}
+
+
+```
+
+Execute the following:
 
 ```{r}
 ci2 <- makeBootstrapCI(dispCoef,
@@ -84,6 +133,8 @@ lr_germany <- glmer(completed_course ~ prior_gpa_s +
                                        quiz_attempts_s + 
                                        (1|device_type), data = df_germ,
                                        family = binomial) 
+lr_germany
+
 #united states
 df_us <- df %>%
          filter(country == "US") %>%
@@ -96,6 +147,7 @@ lr_us <- glmer(completed_course ~ prior_gpa_s +
                                   quiz_attempts_s + 
                                   (1|device_type), data = df_us,
                                   family = binomial) 
+lr_us
 
 #India
 df_india <- df %>%
@@ -109,6 +161,7 @@ lr_india <- glmer(completed_course ~ prior_gpa_s +
                                      quiz_attempts_s + 
                                      (1|device_type), data = df_india,
                                      family = binomial) 
+lr_india
 
 #Lithuania
 df_lithuania <- df %>%
@@ -122,6 +175,7 @@ lr_lithuania <- glmer(completed_course ~ prior_gpa_s +
                                          quiz_attempts_s + 
                                          (1|device_type), data = df_lithuania,
                                          family = binomial) 
+lr_lithuania
 
 #Nigeria
 df_nigeria <- df %>%
@@ -135,6 +189,7 @@ lr_nigeria <- glmer(completed_course ~ prior_gpa_s +
                                        quiz_attempts_s + 
                                        (1|device_type), data = df_nigeria,
                                        family = binomial) 
+lr_nigeria
 
 #other countries
 df_other <- df %>%
@@ -148,6 +203,7 @@ lr_other <- glmer(completed_course ~ prior_gpa_s +
                                      quiz_attempts_s + 
                                      (1|device_type), data = df_other,
                                      family = binomial)
+lr_other
 ```
 
 
@@ -160,6 +216,59 @@ lr_other <- glmer(completed_course ~ prior_gpa_s +
 Report the running time (from system.time) for each of the 6 models.
 
 ```{r}
+time_germ <- system.time({
+  lr_germany <- glmer(completed_course ~ prior_gpa_s + 
+                                       forum_posts_s + 
+                                       quiz_attempts_s + 
+                                       (1|device_type), data = df_germ,
+                                       family = binomial) 
+})
+time_germ["elapsed"]
+  
+time_ind <- system.time({
+  lr_india <- glmer(completed_course ~ prior_gpa_s + 
+                                     forum_posts_s + 
+                                     quiz_attempts_s + 
+                                     (1|device_type), data = df_india,
+                                     family = binomial) 
+})
+time_ind["elapsed"]
+
+time_us <- system.time({
+  lr_us <- glmer(completed_course ~ prior_gpa_s + 
+                                  forum_posts_s + 
+                                  quiz_attempts_s + 
+                                  (1|device_type), data = df_us,
+                                  family = binomial) 
+})
+time_us["elapsed"]
+
+time_lith <- system.time({
+  lr_lithuania <- glmer(completed_course ~ prior_gpa_s + 
+                                         forum_posts_s + 
+                                         quiz_attempts_s + 
+                                         (1|device_type), data = df_lithuania,
+                                         family = binomial) 
+})
+time_lith["elapsed"]
+
+time_nigeria <- system.time({
+  lr_nigeria <- glmer(completed_course ~ prior_gpa_s + 
+                                       forum_posts_s + 
+                                       quiz_attempts_s + 
+                                       (1|device_type), data = df_nigeria,
+                                       family = binomial) 
+})
+time_nigeria["elapsed"]
+
+time_other <- system.time({
+  lr_other <- glmer(completed_course ~ prior_gpa_s + 
+                                     forum_posts_s + 
+                                     quiz_attempts_s + 
+                                     (1|device_type), data = df_other,
+                                     family = binomial) 
+})
+time_other["elapsed"]
 
 ```
 
@@ -176,11 +285,17 @@ b. Devise an approach that minimizes the running time of your script. Report the
 
 Redo of problem set 4 question 2 with data table.
 
+```{r}
+atp <- fread("https://raw.githubusercontent.com/JeffSackmann/tennis_atp/refs/heads/master/atp_matches_2019.csv")
+class(atp)
+```
+
 a. How many tournaments took place in 2019?
 
 ```{r}
 
 ```
+
 
 b. Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
 
@@ -188,11 +303,13 @@ b. Did any player win more than one tournament? If so, how many players won more
 
 ```
 
+
 c. Is there any evidence that winners have more aces than losers? (If you address this with a hypothesis test, do not use base R functionality - continue to remain in the Tidyverse.)
 
 ```{r}
 
 ```
+ 
 
 d. Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
 
