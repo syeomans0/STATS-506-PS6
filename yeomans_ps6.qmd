@@ -333,13 +333,24 @@ The total number of players with multiple tournament wins is $17$ and the player
 c. Is there any evidence that winners have more aces than losers? (If you address this with a hypothesis test, do not use base R functionality - continue to remain in the Tidyverse.)
 
 ```{r}
-
+aces <- atp[, .(mean_winners = mean(w_ace, na.rm = TRUE),
+                mean_losers = mean(l_ace, na.rm = TRUE),
+                sd_winners = sd(w_ace, na.rm = TRUE),
+                sd_losers = sd(l_ace, na.rm = TRUE),
+            mean_diff = mean(w_ace, na.rm = TRUE) - mean(l_ace, na.rm = TRUE))]
+aces
 ```
- 
+I decided to just stick with doing some summary statistics as I did in problem set $4$. From this, we see that the mean aces for winners is $7.45$, rounded to two decimal places. On the other hand, the mean aces for losers is $5.76$, rounded to two decimal places. After finding this and the standard deviation from both, we took the difference in means and found the difference was $1.68$, so we can, informally, say winners on average have more aces than losers. Also, the standard deviations for both groups were quite close meaning the groups had similar variability.
 
 d. Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
 
 ```{r}
+wins_tot <- atp[ , .(num_wins = .N), 
+                by = .(player_id = winner_id, player_name = winner_name)]
+
+loss_tot <- atp[ , .(num_losses = .N), 
+                by = .(player_id = loser_id, player_name = loser_name)]
+
 
 ```
 
