@@ -293,9 +293,27 @@ class(atp)
 a. How many tournaments took place in 2019?
 
 ```{r}
+#exclude the couple dates from 2018 and condense the davis cup (from solutions
+#I didn't do this last time)
+atp <- atp[tourney_date != "20181231"]
+tournaments <- atp[, .(tourney_name = unique(tourney_name))]
+tournaments[, .N]
 
+#this is from the solutions and what i need to do for davis situation
+#tourneys <- tourneys %>%
+#  mutate(tourney_name = str_replace(tourney_name, "Davis.*", "Davis Cup")) %>%
+#  group_by(tourney_name) %>%
+#  summarize() %>%
+#  ungroup()
+#tourneys %>%
+#  nrow()
+
+#davis fix
+davis_fix <- atp[grepl("^Davis", tourney_name), tourney_name := "Davis Cup" ]
+davis_fix <- atp[ , .(tourney_name = unique(tourney_name))]
+davis_fix[, .N]
 ```
-
+This doesn't quite match the solutions, but it makes sense it is off by three. This is due to the fact that I am still excluding the 2018 date, in which there are three observations. The solutions didn't include this, so it makes sense mine is off by $3$ with a total number of $66$ unique tournaments.
 
 b. Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
 
