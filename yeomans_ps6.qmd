@@ -64,16 +64,41 @@ C_moment(x, 4)
 moment(x, order = 4, center = TRUE, absolute = FALSE, scale = TRUE)
 ```
 
-I ran into issues constantly with this problem, issues on a system level not really with the code itself. I keep getting the error to install something to compile C code, but I have installed it (and uninstalled it) multiple times and it has never worked. I am assuming this would work if whatever underlying C/C++ issues I am running into was not occurring. I have given up on trying to get it to work, I will take the L.
+I ran into issues constantly with this problem, issues on a system level not really with the code itself. I keep getting the error to install something to compile C code, but I have installed it (and uninstalled it) multiple times and it has never worked. I am assuming this would work if whatever underlying C/C++ issues I am running into was not occurring. I have given up on trying to get it to work.
 
 ## Problem 2
 
 a. Write a class bootstrapWaldCI that produces a CI using bootstrap, similar to waldCI.
 
 ```{r}
+library(parallel)
+source("waldCI_sol.R")
+```
 
+```{r}
+setClass("bootstrapWaldCI", contains = "waldCI", slots = c(fun = "function",
+                                                           data = "ANY",
+                                                           reps = "numeric",
+                                                      bootEstimates = "numeric",
+                                                      compute = "character"))
+
+makeBootstrapCI <- function(fun, data, reps = 1000, level = 0.95, 
+                            compute = "serial"){
+  if (compute == "serial") {
+    
+  } else if (compute == "parallel") {
+    
+  }
+}
 
 ```
+
+```{r}
+setMethod("rebootstrap", "bootstrapWaldCI", function(object) {
+  
+})
+```
+
 
 b. Show your code works by executing the following:
 
