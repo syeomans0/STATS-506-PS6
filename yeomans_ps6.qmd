@@ -52,6 +52,7 @@ double C_moment(NumericVector v, int k) {
 Generate a vector of moderate length and show that you are able to replicate the results of e1071::moment.
  
 ```{r}
+#| echo: true
 #Be cognizant of your scaling factor.
 #Be sure to look at the arguments of e1071::moment
 #install.packages("e1071")
@@ -71,11 +72,13 @@ I ran into issues constantly with this problem, issues on a system level not rea
 a. Write a class bootstrapWaldCI that produces a CI using bootstrap, similar to waldCI.
 
 ```{r}
+#| echo: true
 #library(parallel)
 source("waldCI_sol.R")
 ```
 
 ```{r}
+#| echo: true
 setClass("bootstrapWaldCI", contains = "waldCI", 
          slots = c(fun = "function",
                    data = "data.frame",
@@ -116,6 +119,7 @@ makeBootstrapCI <- function(fun, data, reps = 1000, level = 0.95,
 ```
 
 ```{r}
+#| echo: true
 setGeneric("rebootstrap",
            function(object) {
              standardGeneric("rebootstrap")
@@ -161,6 +165,7 @@ setMethod("rebootstrap", "bootstrapWaldCI", function(object) {
 b. Show your code works by executing the following:
 
 ```{r}
+#| echo: true
 ci1 <- makeBootstrapCI(function(x) mean(x$y),
                        ggplot2::diamonds,
                        reps = 1000)
@@ -169,6 +174,7 @@ rebootstrap(ci1)
 ```
 
 ```{r}
+#| echo: true
 system.time({
   ci_serial <- makeBootstrapCI(function(x) mean(x$y),
                                ggplot2::diamonds,
@@ -192,9 +198,10 @@ By comparing the two run time of the compute methods, serial and parallel, we se
 c. Write a function called dispCoef that takes in data (based upon mtcars; it must take in a generic data for the bootstrap) and fits the model: mpg ~ cyl + disp + wt. It should return the coefficient associated with disp. 
 
 ```{r}
+#| echo: true
 dispCoef <- function(data) {
   model <- lm(mpg ~ cyl + disp + wt, data = data)
-  coef(model)["disp"]
+  return(coef(model)["disp"])
 }
 ci2 <- makeBootstrapCI(dispCoef,
                        mtcars,
@@ -205,6 +212,7 @@ rebootstrap(ci2)
 Got about the same CIs for the two methods!
 
 ```{r}
+#| echo: true
 system.time({
   ci_serial <- makeBootstrapCI(dispCoef,
                        mtcars,
@@ -229,6 +237,7 @@ Once again the parallel takes more time than the serial, due to the fact that th
 Generate artificial data by running the code in script:
 
 ```{r}
+#| echo: true
 source("script_q3.R")
 ```
 
@@ -343,6 +352,7 @@ From this graph we can see that all the countries have similar coefficients for 
 Report the running time (from system.time) for each of the 6 models.
 
 ```{r}
+#| echo: true
 time_germ <- system.time({
   lr_germany <- glmer(completed_course ~ prior_gpa_s + 
                                        forum_posts_s + 
@@ -405,6 +415,7 @@ b. Devise an approach that minimizes the running time of your script. Report the
 This doesn't say I have to do parallel, so I am just going to do lapply here. Sorry but I really don't want to do more parallel on my Windows machine (which is old and slow anyway).
 
 ```{r}
+#| echo: true
 #filter everything for the countries at once
 countries <- c("Germany","US","India","Lithuania","Nigeria","Other")
 df_faster <- lapply(countries, function(ctry) {
@@ -443,6 +454,7 @@ Doing parallelization shaved off about 400 seconds of runtime which is kinda cra
 Redo of problem set 4 question 2 with data table.
 
 ```{r}
+#| echo: true
 atp <- fread("https://raw.githubusercontent.com/JeffSackmann/tennis_atp/refs/heads/master/atp_matches_2019.csv")
 class(atp)
 ```
@@ -450,6 +462,7 @@ class(atp)
 a. How many tournaments took place in 2019?
 
 ```{r}
+#| echo: true
 #exclude the couple dates from 2018 and condense the davis cup (from solutions
 #I didn't do this last time)
 atp <- atp[tourney_date != "20181231"]
@@ -477,6 +490,7 @@ This doesn't quite match the solutions, but it makes sense it is off by three. T
 b. Did any player win more than one tournament? If so, how many players won more than one tournament, and how many tournaments did the most winning player(s) win?
 
 ```{r}
+#| echo: true
 play_win <- atp[, .SD[which.max(match_num)], by = tourney_name]
 
 multiple_W <- play_win[, .(wins = .N), by = winner_name][wins > 1][order(-wins)]
@@ -490,6 +504,7 @@ The total number of players with multiple tournament wins is $17$ and the player
 c. Is there any evidence that winners have more aces than losers? (If you address this with a hypothesis test, do not use base R functionality - continue to remain in the Tidyverse.)
 
 ```{r}
+#| echo: true
 aces <- atp[, .(mean_winners = mean(w_ace, na.rm = TRUE),
                 mean_losers = mean(l_ace, na.rm = TRUE),
                 sd_winners = sd(w_ace, na.rm = TRUE),
@@ -502,6 +517,7 @@ I decided to just stick with doing some summary statistics as I did in problem s
 d. Identify the player(s) with the highest win-rate. (Note that this is NOT asking for the highest number of wins.) Restrict to players with at least 5 matches.
 
 ```{r}
+#| echo: true
 wins_tot <- atp[ , .(num_wins = .N), 
                 by = .(player_id = winner_id, player_name = winner_name)]
 
