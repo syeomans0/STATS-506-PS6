@@ -31,7 +31,7 @@ cppFunction("
 double C_moment(NumericVector v, int k) {
   int n = v.length();
   
-  // compute the mean, copt from temp
+  // compute the mean, copt from template
   double sum = 0;
   for (int i = 0; i < v.length(); ++i) {
     sum += v[i];
@@ -56,7 +56,7 @@ Generate a vector of moderate length and show that you are able to replicate the
 #Be sure to look at the arguments of e1071::moment
 #install.packages("e1071")
 library(e1071)
-?e1071::moment
+#?e1071::moment
 
 set.seed(3)
 x <- rnorm(50)
@@ -242,13 +242,11 @@ forum_posts_coefs <- data.frame(
 
 # Plot
 ggplot(forum_posts_coefs, aes(x = country, y = coef)) +
-  geom_point(size = 3, color = "pink") +
-  labs(
-    title = "Coefficient for the forum posts by country",
-    x = "Country",
-    y = "Coefficients"
-  ) +
-  theme_minimal()
+  geom_point(color = "navy") +
+  labs(title = "Coefficient for the Forum Posts, by Country",
+       x = "Country",
+       y = "Coefficient") +
+  theme_bw()
 ```
 From this graph we can see that all the countries have similar coefficients for the forum posts. However, we do see a bit of a gap between Nigeria and the others. Also, have to note that the coefficients are the log of the odds ratio and kind of hard to interpret. All the coefficients are in the range of $0.1700$ and $0.200$.
 
@@ -310,14 +308,44 @@ time_other <- system.time({
 time_other["elapsed"]
 
 ```
-From this, we can see that all the models take a while to run, but we see that the other category, India, and the US take a bit longer than the others (possibly due to them having more observations, particularly for other bc this could have multiple countries. On the other hand, Lithuania and Nigeria take the shortest time to run with only a couple seconds(I assume this is the units), maybe because it has less observations. 
+From this, we can see that all the models take a while to run, but we see that the other category (321), India (182), and the US (228) take a bit longer than the others (possibly due to them having more observations, particularly for other bc this could have multiple countries. On the other hand, Lithuania (2) and Nigeria (5) take the shortest time to run with only a couple seconds(I assume this is the units), maybe because it has less observations. This has a total run time of 860.57.
 
 b. Devise an approach that minimizes the running time of your script. Report the running time of your entire script (running models and estimating coefficients; no need for a new plot). Do not use a different package for the models. Show that the results match those from part a).
 
+This doesn't say I have to do parallel, so I am just going to do lapply here. Sorry but I really don't want to do more parallel on my Windows machine (which is old and slow anyway).
+
 ```{r}
+#filter everything for the countries at once
+countries <- c("Germany","US","India","Lithuania","Nigeria","Other")
+df_faster <- lapply(countries, function(ctry) {
+              df %>%
+              filter(country == ctry) %>%
+              mutate(prior_gpa_s = scale(prior_gpa),
+                     forum_posts_s = scale(forum_posts),
+                     quiz_attempts_s = scale(quiz_attempts))
+ })
+ 
+models_glmer <- function(data) {
+   glmer(
+     completed_course ~ prior_gpa_s + forum_posts_s + quiz_attempts_s + (1|device_type),
+     data = data,
+     family = binomial
+   )
+ }
+ 
+cl <- makeCluster(detectCores() - 1)   
+clusterEvalQ(cl, library(lme4))        
+clusterExport(cl, c("df_faster", "models_glmer"))  
 
+time_parallel <- system.time({
+  model_list <- parLapply(cl, df_faster, models_glmer)
+})
+
+stopCluster(cl)
+
+time_parallel["elapsed"]
 ```
-
+Doing parallelization shaved off about 400 seconds of runtime which is kinda crazy. My computer did sound like a jet engine when running this but that's a different story. The total run time using parallelization was 425.36 seconds but I didn't do the individual model runtimes. I don't think this matters too much, just running the models in parallel really saved a lot of time. I will say I was struggling with this quite a bit and did lots of different tries without the parallel. I ended up using Chat to help figure out how to get everything to work properly on my windows laptop but only after I had a base going (it mostly helped with how many cores to use as well as eval and export since I'm not too confident in that). Thanks to this I was able to cut a lot of time off. When I was doing lapply stuff and other techniques it, at max, shaved off 80-100 seconds only. 
 
 
 ## Problem 4
