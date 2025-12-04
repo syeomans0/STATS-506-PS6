@@ -116,8 +116,44 @@ makeBootstrapCI <- function(fun, data, reps = 1000, level = 0.95,
 ```
 
 ```{r}
+setGeneric("rebootstrap",
+           function(object) {
+             standardGeneric("rebootstrap")
+           })
+
 setMethod("rebootstrap", "bootstrapWaldCI", function(object) {
+  fun <- object@fun
+  data <- object@data
+  reps <- object@reps
+  compute <- object@compute
+  level <- object@level
+  if (compute == "serial") {
+    
+    bootstrap_est <- lapply(seq_len(reps), function(i) {
+      dat <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+      return(fun(dat))
+      
+    })
+  } else if (compute == "parallel") {
+    
+    cl <- makeCluster(detectCores() - 1)   
+    clusterExport(cl, c("data", "fun"), envir = environment())
+    bootstrap_est <- parLapply(cl, seq_len(reps), function(i) {
+    dat <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+    return(fun(dat))
+    
+    })
+
+    stopCluster(cl)
+  }
+  boot_ans <- unlist(bootstrap_est)
+
+  boot_mean <- mean(boot_ans)
+  boot_se <- sd(boot_ans)
   
+  return(new("bootstrapWaldCI", fun = fun, data = data, reps = reps,
+         level = level, mean = boot_mean, sterr = boot_se, bootEstimates = boot_ans,
+         compute = compute))
 })
 ```
 
@@ -132,7 +168,25 @@ ci1
 rebootstrap(ci1)
 ```
 
-Compare and comment on the performance of the two compute methods.
+```{r}
+system.time({
+  ci_serial <- makeBootstrapCI(function(x) mean(x$y),
+                               ggplot2::diamonds,
+                               reps = 1000,
+                               compute = "serial")
+})
+
+system.time({
+  ci_parallel <- makeBootstrapCI(function(x) mean(x$y),
+                                 ggplot2::diamonds,
+                                 reps = 1000,
+                                 compute = "parallel")
+})
+```
+
+The two CIs are very close to each other and we can see things are running well.
+
+By comparing the two run time of the compute methods, serial and parallel, we see something quite interesting. The parallel actually took more time to run than the serial one. I think this is due to the fact that I am on Windows. On Windows, parallelization requires creating separate R processes and exporting objects to them, so it takes longer than doing it serially.
 
 
 c. Write a function called dispCoef that takes in data (based upon mtcars; it must take in a generic data for the bootstrap) and fits the model: mpg ~ cyl + disp + wt. It should return the coefficient associated with disp. 
