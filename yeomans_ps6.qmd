@@ -192,21 +192,35 @@ By comparing the two run time of the compute methods, serial and parallel, we se
 c. Write a function called dispCoef that takes in data (based upon mtcars; it must take in a generic data for the bootstrap) and fits the model: mpg ~ cyl + disp + wt. It should return the coefficient associated with disp. 
 
 ```{r}
-
-
-```
-
-Execute the following:
-
-```{r}
+dispCoef <- function(data) {
+  model <- lm(mpg ~ cyl + disp + wt, data = data)
+  coef(model)["disp"]
+}
 ci2 <- makeBootstrapCI(dispCoef,
                        mtcars,
                        reps = 1000)
 ci2
 rebootstrap(ci2)
 ```
+Got about the same CIs for the two methods!
 
-Compare and comment on the performance of the two compute methods.
+```{r}
+system.time({
+  ci_serial <- makeBootstrapCI(dispCoef,
+                       mtcars,
+                       reps = 1000,
+                       compute = "serial")
+})
+
+system.time({
+  ci_parallel <- makeBootstrapCI(dispCoef,
+                       mtcars,
+                       reps = 1000,
+                       compute = "parallel")
+})
+```
+
+Once again the parallel takes more time than the serial, due to the fact that this is a small job so sending it off to different cores and coming back actually takes longer than just running it in serial.
 
 
 
