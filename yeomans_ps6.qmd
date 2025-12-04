@@ -71,26 +71,48 @@ I ran into issues constantly with this problem, issues on a system level not rea
 a. Write a class bootstrapWaldCI that produces a CI using bootstrap, similar to waldCI.
 
 ```{r}
-library(parallel)
+#library(parallel)
 source("waldCI_sol.R")
 ```
 
 ```{r}
-setClass("bootstrapWaldCI", contains = "waldCI", slots = c(fun = "function",
-                                                           data = "ANY",
-                                                           reps = "numeric",
-                                                      bootEstimates = "numeric",
-                                                      compute = "character"))
+setClass("bootstrapWaldCI", contains = "waldCI", 
+         slots = c(fun = "function",
+                   data = "data.frame",
+                   reps = "numeric",
+                   bootEstimates = "numeric",
+                   compute = "character"))
 
 makeBootstrapCI <- function(fun, data, reps = 1000, level = 0.95, 
                             compute = "serial"){
   if (compute == "serial") {
     
+    bootstrap_est <- lapply(seq_len(reps), function(i) {
+      dat <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+      return(fun(dat))
+      
+    })
   } else if (compute == "parallel") {
     
-  }
-}
+    cl <- makeCluster(detectCores() - 1)   
+    clusterExport(cl, c("data", "fun"), envir = environment())
+    bootstrap_est <- parLapply(cl, seq_len(reps), function(i) {
+    dat <- data[sample(seq_len(nrow(data)), replace = TRUE), ]
+    return(fun(dat))
+    
+    })
 
+    stopCluster(cl)
+  }
+  boot_ans <- unlist(bootstrap_est)
+
+  boot_mean <- mean(boot_ans)
+  boot_se <- sd(boot_ans)
+  
+  return(new("bootstrapWaldCI", fun = fun, data = data, reps = reps,
+         level = level, mean = boot_mean, sterr = boot_se, bootEstimates = boot_ans,
+         compute = compute))
+}
 ```
 
 ```{r}
